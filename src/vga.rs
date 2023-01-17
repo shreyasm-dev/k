@@ -1,4 +1,5 @@
 use volatile::Volatile;
+use core::fmt::{Write, Result};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -86,5 +87,12 @@ impl Writer {
         _ => self.write_byte(0xfe),
       }
     }
+  }
+}
+
+impl Write for Writer {
+  fn write_str(&mut self, s: &str) -> Result {
+    self.write_string(s);
+    Ok(())
   }
 }
