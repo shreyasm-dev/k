@@ -1,20 +1,23 @@
 #![no_std]
 #![no_main]
 
+mod vga;
+
 use core::panic::PanicInfo;
 
-static HELLO: &[u8] = b"Hello World!";
+use vga::Writer;
+
+static TEXT: &'static str = "Hello, buffer!";
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-  let vga_buffer = 0xb8000 as *mut u8;
+  let mut writer = Writer {
+    column_position: 0,
+    color_code: vga::ColorCode::new(vga::Color::Yellow, vga::Color::Black),
+    buffer: unsafe { &mut *(0xb8000 as *mut vga::Buffer) },
+  };
 
-  for (i, &byte) in HELLO.iter().enumerate() {
-    unsafe {
-      *vga_buffer.offset(i as isize * 2) = byte;
-      *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
-    }
-  }
+  writer.write_string(TEXT);
 
   loop {}
 }
