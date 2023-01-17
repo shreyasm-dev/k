@@ -4,10 +4,10 @@
 mod vga;
 
 use core::panic::PanicInfo;
-
+use core::fmt::Write;
 use vga::Writer;
 
-static TEXT: &'static str = "Hello, buffer!";
+static TEXT: &'static str = "world";
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
@@ -17,7 +17,7 @@ pub extern "C" fn _start() -> ! {
     buffer: unsafe { &mut *(0xb8000 as *mut vga::Buffer) },
   };
 
-  writer.write_string(TEXT);
+  write!(writer, "Hello, {}!", TEXT).unwrap();
 
   loop {}
 }
