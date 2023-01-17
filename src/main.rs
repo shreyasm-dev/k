@@ -7,6 +7,7 @@
 
 mod vga;
 mod qemu;
+mod serial;
 mod test;
 
 use core::panic::PanicInfo;

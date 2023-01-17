@@ -1,5 +1,5 @@
 #[cfg(test)]
-use crate::println;
+use crate::serial_println;
 
 #[cfg(test)]
 use core::fmt::Debug;
@@ -7,9 +7,9 @@ use core::fmt::Debug;
 #[cfg(test)]
 pub fn assert(condition: bool) -> bool {
   if condition {
-    println!("[ok]");
+    serial_println!("[ok]");
   } else {
-    println!("[failed]");
+    serial_println!("[failed]");
   }
 
   condition
@@ -18,9 +18,9 @@ pub fn assert(condition: bool) -> bool {
 #[cfg(test)]
 pub fn assert_eq<T: PartialEq + Debug>(left: T, right: T) -> bool {
   if left == right {
-    println!("[ok]");
+    serial_println!("[ok]");
   } else {
-    println!("[failed] {:?} != {:?}", left, right);
+    serial_println!("[failed] {:?} != {:?}", left, right);
   }
 
   left == right
