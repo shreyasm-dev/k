@@ -46,7 +46,4 @@ fn test_runner(tests: &[&dyn Fn() -> bool]) {
   exit_qemu(if passed { QemuExitCode::Success } else { QemuExitCode::Failed });
 }
 
-#[test_case]
-fn trivial_assertion() -> bool {
-  assert_eq(1, 1)
-}
+test!(trivial_assertion, || assert_eq(1, 2));

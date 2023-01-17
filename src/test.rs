@@ -25,3 +25,14 @@ pub fn assert_eq<T: PartialEq + Debug>(left: T, right: T) -> bool {
 
   left == right
 }
+
+#[macro_export]
+macro_rules! test {
+  ($name:ident, $test:expr) => {
+    #[test_case]
+    fn $name() -> bool {
+      serial_print!("{} ... ", stringify!($name));
+      $test()
+    }
+  };
+}
