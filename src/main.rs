@@ -11,12 +11,10 @@ mod serial;
 mod test;
 
 use core::panic::PanicInfo;
+use crate::qemu::{exit_qemu, QemuExitCode};
 
 #[cfg(test)]
 use crate::test::assert_eq;
-
-#[cfg(test)]
-use crate::qemu::{exit_qemu, QemuExitCode};
 
 static TEXT: &'static str = "world";
 
@@ -25,12 +23,17 @@ pub extern "C" fn _start() -> ! {
   #[cfg(test)]
   test_main();
 
+  println!("Hello, {}!", TEXT);
+  println!("Goodbye, {}!", TEXT);
+
   loop {}
 }
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-  println!("{}", info);
+  serial_println!("[failed]");
+  serial_println!("Error: {}", info);
+  exit_qemu(QemuExitCode::Failed);
   loop {}
 }
 
