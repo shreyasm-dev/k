@@ -4,14 +4,13 @@
 mod vga;
 
 use core::panic::PanicInfo;
-use core::fmt::Write;
-use vga::{WRITER};
 
 static TEXT: &'static str = "world";
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-  write!(WRITER.lock(), "Hello, {}!\nGoodbye, {}!", TEXT, TEXT).unwrap();
+  println!("Hello, {}!", TEXT);
+  println!("Goodbye, {}!", TEXT);
 
   loop {}
 }
