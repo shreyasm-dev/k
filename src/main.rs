@@ -9,12 +9,10 @@ mod vga;
 mod qemu;
 mod serial;
 mod test;
+mod tests;
 
 use core::panic::PanicInfo;
 use crate::qemu::{exit_qemu, QemuExitCode};
-
-#[cfg(test)]
-use crate::test::assert_eq;
 
 static TEXT: &'static str = "world";
 
@@ -48,5 +46,3 @@ fn test_runner(tests: &[&dyn Fn() -> bool]) {
 
   exit_qemu(if passed { QemuExitCode::Success } else { QemuExitCode::Failed });
 }
-
-test!(trivial_assertion, || assert_eq(1, 2));
