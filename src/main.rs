@@ -6,22 +6,25 @@
 #![reexport_test_harness_main = "test_main"]
 
 mod vga;
+mod qemu;
 mod test;
 
 use core::panic::PanicInfo;
 
 #[cfg(test)]
-use crate::test::assert;
+use crate::test::assert_eq;
+
+#[cfg(test)]
+use crate::qemu::{exit_qemu, QemuExitCode};
 
 static TEXT: &'static str = "world";
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
   #[cfg(test)]
-  assert(1, 2);
+  test_main();
 
-  println!("Hello, {}!", TEXT);
-  panic!("Goodbye, {}!", TEXT);
+  loop {}
 }
 
 #[panic_handler]
@@ -31,9 +34,18 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 #[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
+fn test_runner(tests: &[&dyn Fn() -> bool]) {
+  let mut passed = true;
+
   println!("Running {} tests", tests.len());
   for test in tests {
-    test();
+    passed = passed && test();
   }
+
+  exit_qemu(if passed { QemuExitCode::Success } else { QemuExitCode::Failed });
+}
+
+#[test_case]
+fn trivial_assertion() -> bool {
+  assert_eq(1, 1)
 }
