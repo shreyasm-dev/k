@@ -17,7 +17,7 @@ pub extern "C" fn _start() -> ! {
     buffer: unsafe { &mut *(0xb8000 as *mut vga::Buffer) },
   };
 
-  write!(writer, "Hello, {}!", TEXT).unwrap();
+  write!(writer, "Hello, {}!\nGoodbye, {}!", TEXT, TEXT).unwrap();
 
   loop {}
 }
