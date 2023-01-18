@@ -1,8 +1,8 @@
 #![no_std]
 #![no_main]
 
-use k::test_should_fail;
+use k::test_should_panic;
 
-test_should_fail!(should_panic, || {
+test_should_panic!(should_panic, || {
   panic!("This test should panic");
 });

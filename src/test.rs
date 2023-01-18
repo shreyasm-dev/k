@@ -23,7 +23,7 @@ macro_rules! test {
 }
 
 #[macro_export]
-macro_rules! test_should_fail {
+macro_rules! test_should_panic {
   ($name:ident, $test:expr) => {
     use k::{
       qemu::{exit_qemu, QemuExitCode},
