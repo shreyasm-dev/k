@@ -5,6 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 #![feature(abi_x86_interrupt)]
 
+pub mod gdt;
 pub mod interrupt;
 pub mod qemu;
 pub mod serial;
@@ -12,10 +13,12 @@ pub mod test;
 pub mod vga;
 
 use core::panic::PanicInfo;
+use gdt::init_gdt;
 use interrupt::init_idt;
 use qemu::{exit_qemu, QemuExitCode};
 
 pub fn init() {
+  init_gdt();
   init_idt();
 }
 
