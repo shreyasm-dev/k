@@ -1,15 +1,15 @@
+#![no_std]
+#![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(k::test_runner)]
+#![reexport_test_harness_main = "test_main"]
+
 #[cfg(test)]
-#[allow(unused_imports)]
-use crate::{
-  test::assert,
-  vga::{WRITER, BUFFER_HEIGHT},
-  println,
-  serial_print,
-  serial_println,
-  test,
+use k::{
+  println, test,
+  vga::{BUFFER_HEIGHT, WRITER},
 };
 
-#[test_case]
 test!(println_simple, || {
   let mut passed = true;
 
