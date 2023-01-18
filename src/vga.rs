@@ -136,6 +136,28 @@ macro_rules! println {
   ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
 }
 
+pub fn backspace() {
+  interrupts::without_interrupts(|| {
+    let mut writer = WRITER.lock();
+    if writer.column_position > 0 {
+      writer.column_position -= 1;
+      writer.write_byte(b' ');
+      writer.column_position -= 1;
+    }
+  });
+}
+
+pub fn clear_screen() {
+  interrupts::without_interrupts(|| {
+    let mut writer = WRITER.lock();
+    for i in 0..BUFFER_HEIGHT {
+      writer.clear_row(i);
+    }
+
+    writer.column_position = BUFFER_WIDTH - 1;
+  });
+}
+
 #[doc(hidden)]
 pub fn _print(args: Arguments) {
   interrupts::without_interrupts(|| {

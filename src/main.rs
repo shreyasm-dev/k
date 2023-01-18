@@ -5,17 +5,14 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use k::{halt, init, println};
+use k::{halt, init, shell::prompt};
 
 #[cfg(test)]
 use k::test_panic_handler;
 
-static TEXT: &'static str = "world";
-
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-  println!("Hello, {}!", TEXT);
-  println!("Goodbye, {}?", TEXT);
+  prompt();
 
   init();
 
@@ -28,6 +25,8 @@ pub extern "C" fn _start() -> ! {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
+  use k::println;
+
   println!("{}", info);
   halt();
 }

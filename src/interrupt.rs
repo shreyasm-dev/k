@@ -1,4 +1,4 @@
-use crate::{gdt, print, println, test_no_main};
+use crate::{gdt, println, shell::on_keydown, test_no_main};
 use lazy_static::lazy_static;
 use pc_keyboard::{layouts, DecodedKey, HandleControl, Keyboard, ScancodeSet1};
 use pic8259::ChainedPics;
@@ -88,8 +88,8 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
   if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
     if let Some(key) = keyboard.process_keyevent(key_event) {
       match key {
-        DecodedKey::Unicode(character) => print!("{}", character),
-        DecodedKey::RawKey(key) => print!("{:?}", key),
+        DecodedKey::Unicode(character) => on_keydown(character),
+        _ => (),
       }
     }
   }

@@ -9,6 +9,7 @@ pub mod gdt;
 pub mod interrupt;
 pub mod qemu;
 pub mod serial;
+pub mod shell;
 pub mod test;
 pub mod util;
 pub mod vga;
