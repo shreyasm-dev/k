@@ -8,8 +8,31 @@ macro_rules! test {
 
     #[no_mangle]
     pub extern "C" fn _start() -> ! {
-      #[cfg(test)]
       test_main();
+      loop {}
+    }
+  };
+}
+
+#[macro_export]
+macro_rules! test_should_fail {
+  ($name:ident, $test:expr) => {
+    use k::{qemu::{exit_qemu, QemuExitCode}, util::{failed, ok, running}};
+
+    #[no_mangle]
+    pub extern "C" fn _start() -> ! {
+      running(stringify!($name));
+      $test();
+      failed(stringify!($name));
+      exit_qemu(QemuExitCode::Failed);
+      loop {}
+    }
+
+    #[cfg(test)]
+    #[panic_handler]
+    pub fn panic(_info: &core::panic::PanicInfo) -> ! {
+      ok(stringify!($name));
+      exit_qemu(QemuExitCode::Success);
       loop {}
     }
   };

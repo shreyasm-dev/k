@@ -10,12 +10,14 @@ pub mod interrupt;
 pub mod qemu;
 pub mod serial;
 pub mod test;
+pub mod util;
 pub mod vga;
 
 use core::panic::PanicInfo;
 use gdt::init_gdt;
 use interrupt::init_idt;
 use qemu::{exit_qemu, QemuExitCode};
+use util::{failed, ok, running};
 
 pub fn init() {
   init_gdt();
@@ -25,24 +27,29 @@ pub fn init() {
 pub fn test_runner(tests: &[&dyn Fn() -> (&'static str, fn() -> bool)]) {
   let results = tests.iter().map(|test| {
     let test = test();
-    serial_println!("\x1b[1;37;44m[running]\x1b[0m {}", test.0);
+    running(test.0);
     (test.0, test.1())
   });
 
   for (name, passed) in results {
     if passed {
-      serial_println!("\x1b[1;30;47m[ok]\x1b[0m {}", name);
+      ok(name);
     } else {
-      serial_println!("\x1b[1;37;41m[failed]\x1b[0m {}", name);
+      failed(name);
     }
   }
 
   exit_qemu(QemuExitCode::Success);
 }
 
+#[cfg(test)]
 #[panic_handler]
 pub fn panic(info: &PanicInfo) -> ! {
-  println!("{}", info);
+  test_panic_handler(info)
+}
+
+pub fn test_panic_handler(info: &PanicInfo) -> ! {
+  serial_println!("{}", info);
   exit_qemu(QemuExitCode::Failed);
   loop {}
 }
