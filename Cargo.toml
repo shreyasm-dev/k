@@ -12,6 +12,8 @@ x86_64 = "0.14.10"
 uart_16550 = "0.2.18"
 pic8259 = "0.10.1"
 pc-keyboard = "0.5.1"
+rand_xorshift = "0.3.0"
+rand_core = "0.6.4"
 
 [package.metadata.bootimage]
 test-success-exit-code = 33

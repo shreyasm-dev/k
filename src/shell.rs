@@ -1,10 +1,11 @@
-use core::str::from_utf8_unchecked;
-
 use crate::{
   print, println,
   vga::{backspace, clear_screen, BUFFER_WIDTH},
 };
+use core::str::from_utf8_unchecked;
 use lazy_static::lazy_static;
+use rand_core::{RngCore, SeedableRng};
+use rand_xorshift::XorShiftRng;
 use spin::lock_api::Mutex;
 use x86_64::instructions::interrupts;
 
@@ -74,38 +75,40 @@ pub fn on_keydown(key: char) {
     let str = unsafe { from_utf8_unchecked(&bytes) }.trim();
 
     shell.clear();
+    match str {
+      "help" => {
+        println!("
+Available commands:
+    help - Show this message
+    about - Show information about the OS
+    clear - Clear the screen
+    rand <seed: u64> - Generate a cryptographically insecure random number using <seed> (if seed is not a valid u64, 0 is used)
+    panic - Panic the kernel
+    echo <text> - Print <text> to the screen");
+      }
+      "about" => println!("\nSimple operating system written in Rust, developed by shreyasm-dev"),
+      "clear" => {
+        interrupts::without_interrupts(|| {
+          clear_screen();
+        });
 
-    println!(
-      "\n{}",
-      match str {
-        "help" =>
-          "Available commands:
-help - Show this message
-about - Show information about the OS
-clear - Clear the screen
-panic - Panic the kernel
-echo <text> - Print <text> to the screen",
-        "about" => "Simple operating system written in Rust, developed by shreyasm-dev",
-        "clear" => {
-          interrupts::without_interrupts(|| {
-            clear_screen();
-          });
-
-          ""
-        }
-        "panic" => {
-          println!();
-          panic!("Panic from shell")
-        }
-        _ => {
-          if str.starts_with("echo ") {
-            &str[5..]
-          } else {
-            "Unknown command, type 'help' for a list of available commands"
-          }
+        println!();
+      }
+      "panic" => {
+        println!();
+        panic!("Panic from shell")
+      }
+      _ => {
+        if str.starts_with("echo ") {
+          println!("\n{}", &str[5..]);
+        } else if str.starts_with("rand ") {
+          let seed = str[5..].parse::<u64>().unwrap_or(0);
+          println!("\n{}", XorShiftRng::seed_from_u64(seed).next_u64());
+        } else {
+          println!("\nUnknown command, type 'help' for a list of available commands");
         }
       }
-    );
+    }
 
     prompt();
   } else if shell.add_char(key) {
