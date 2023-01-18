@@ -18,9 +18,9 @@ pub fn test_runner(tests: &[&dyn Fn() -> (&'static str, bool)]) {
 
   for (name, passed) in results {
     if passed {
-      serial_println!("[ok] {}", name);
+      serial_println!("\x1b[1;30;47m[ok]\x1b[0m {}", name);
     } else {
-      serial_println!("[failed] {}", name);
+      serial_println!("\x1b[1;37;41m[failed]\x1b[0m {}", name);
     }
   }
 
