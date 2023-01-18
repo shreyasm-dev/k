@@ -1,4 +1,4 @@
-use crate::println;
+use crate::{println, test_no_main};
 use lazy_static::lazy_static;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
@@ -17,3 +17,8 @@ pub fn init_idt() {
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
   println!("EXCEPTION: BREAKPOINT\n{:#?}", stack_frame);
 }
+
+test_no_main!(breakpoint_exception, || {
+  x86_64::instructions::interrupts::int3();
+  true
+});

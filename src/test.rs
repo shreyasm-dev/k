@@ -14,3 +14,13 @@ macro_rules! test {
     }
   };
 }
+
+#[macro_export]
+macro_rules! test_no_main {
+  ($name:ident, $test:expr) => {
+    #[test_case]
+    fn $name() -> (&'static str, fn() -> bool) {
+      (stringify!($name), $test)
+    }
+  };
+}
