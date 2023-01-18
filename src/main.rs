@@ -14,6 +14,9 @@ mod tests;
 use core::panic::PanicInfo;
 use crate::qemu::{exit_qemu, QemuExitCode};
 
+#[cfg(test)]
+use crate::test::assert;
+
 static TEXT: &'static str = "world";
 
 #[no_mangle]
@@ -41,7 +44,7 @@ fn test_runner(tests: &[&dyn Fn() -> bool]) {
 
   println!("Running {} tests", tests.len());
   for test in tests {
-    passed = passed && test();
+    passed = passed && assert(test());
   }
 
   exit_qemu(if passed { QemuExitCode::Success } else { QemuExitCode::Failed });

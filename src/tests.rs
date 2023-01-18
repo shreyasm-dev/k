@@ -20,5 +20,5 @@ test!(println_simple, || {
     passed = passed && (char::from(screen_char.ascii_character) == c);
   }
 
-  assert(passed)
+  passed
 });
