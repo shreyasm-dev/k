@@ -98,6 +98,8 @@ Available commands:
         println!();
         panic!("Panic from shell")
       }
+      "rand" => println!("\nMissing seed"),
+      "echo" => println!("\n"),
       _ => {
         if str.starts_with("echo ") {
           println!("\n{}", &str[5..]);
