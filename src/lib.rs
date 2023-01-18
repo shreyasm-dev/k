@@ -19,8 +19,12 @@ pub fn init() {
   init_idt();
 }
 
-pub fn test_runner(tests: &[&dyn Fn() -> (&'static str, bool)]) {
-  let results = tests.iter().map(|test| test());
+pub fn test_runner(tests: &[&dyn Fn() -> (&'static str, fn() -> bool)]) {
+  let results = tests.iter().map(|test| {
+    let test = test();
+    serial_println!("\x1b[1;37;44m[running]\x1b[0m {}", test.0);
+    (test.0, test.1())
+  });
 
   for (name, passed) in results {
     if passed {
