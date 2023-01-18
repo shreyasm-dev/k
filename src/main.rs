@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use k::{init, println};
+use k::{halt, init, println};
 
 #[cfg(test)]
 use k::test_panic_handler;
@@ -22,14 +22,14 @@ pub extern "C" fn _start() -> ! {
   #[cfg(test)]
   test_main();
 
-  loop {}
+  halt();
 }
 
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
   println!("{}", info);
-  loop {}
+  halt();
 }
 
 #[cfg(test)]

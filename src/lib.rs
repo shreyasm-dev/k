@@ -54,7 +54,13 @@ pub fn panic(info: &PanicInfo) -> ! {
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
   serial_println!("{}", info);
   exit_qemu(QemuExitCode::Failed);
-  loop {}
+  halt();
+}
+
+pub fn halt() -> ! {
+  loop {
+    instructions::hlt();
+  }
 }
 
 #[cfg(test)]
@@ -62,5 +68,5 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
   init();
   test_main();
-  loop {}
+  halt();
 }

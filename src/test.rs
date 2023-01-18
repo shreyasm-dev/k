@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! test {
   ($name:ident, $test:expr) => {
-    use k::test_panic_handler;
+    use k::{halt, test_panic_handler};
 
     #[test_case]
     fn $name() -> (&'static str, fn() -> bool) {
@@ -17,7 +17,7 @@ macro_rules! test {
     #[no_mangle]
     pub extern "C" fn _start() -> ! {
       test_main();
-      loop {}
+      halt();
     }
   };
 }
@@ -26,6 +26,7 @@ macro_rules! test {
 macro_rules! test_should_panic {
   ($name:ident, $test:expr) => {
     use k::{
+      halt,
       qemu::{exit_qemu, QemuExitCode},
       util::{failed, ok, running},
     };
@@ -36,7 +37,7 @@ macro_rules! test_should_panic {
       $test();
       failed(stringify!($name));
       exit_qemu(QemuExitCode::Failed);
-      loop {}
+      halt();
     }
 
     #[cfg(test)]
@@ -44,7 +45,7 @@ macro_rules! test_should_panic {
     pub fn panic(_info: &core::panic::PanicInfo) -> ! {
       ok(stringify!($name));
       exit_qemu(QemuExitCode::Success);
-      loop {}
+      halt();
     }
   };
 }
@@ -63,7 +64,7 @@ macro_rules! test_should_not_panic {
       $test();
       ok(stringify!($name));
       exit_qemu(QemuExitCode::Success);
-      loop {}
+      halt();
     }
 
     #[cfg(test)]
@@ -71,7 +72,7 @@ macro_rules! test_should_not_panic {
     pub fn panic(_info: &core::panic::PanicInfo) -> ! {
       failed(stringify!($name));
       exit_qemu(QemuExitCode::Failed);
-      loop {}
+      halt();
     }
   };
 }
