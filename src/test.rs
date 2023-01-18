@@ -17,7 +17,10 @@ macro_rules! test {
 #[macro_export]
 macro_rules! test_should_fail {
   ($name:ident, $test:expr) => {
-    use k::{qemu::{exit_qemu, QemuExitCode}, util::{failed, ok, running}};
+    use k::{
+      qemu::{exit_qemu, QemuExitCode},
+      util::{failed, ok, running},
+    };
 
     #[no_mangle]
     pub extern "C" fn _start() -> ! {
