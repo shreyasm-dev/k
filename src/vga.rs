@@ -1,4 +1,4 @@
-use core::fmt::{Result, Write, Arguments};
+use core::fmt::{Arguments, Result, Write};
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;

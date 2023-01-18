@@ -1,17 +1,17 @@
 #![no_std]
-
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![feature(abi_x86_interrupt)]
 
-pub mod vga;
 pub mod qemu;
 pub mod serial;
 pub mod test;
+pub mod vga;
 
-use core::panic::PanicInfo;
 use crate::qemu::{exit_qemu, QemuExitCode};
+use core::panic::PanicInfo;
 
 pub fn test_runner(tests: &[&dyn Fn() -> (&'static str, bool)]) {
   let results = tests.iter().map(|test| test());
