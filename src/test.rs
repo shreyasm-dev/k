@@ -1,9 +1,17 @@
 #[macro_export]
 macro_rules! test {
   ($name:ident, $test:expr) => {
+    use k::test_panic_handler;
+
     #[test_case]
     fn $name() -> (&'static str, fn() -> bool) {
       (stringify!($name), $test)
+    }
+
+    #[cfg(test)]
+    #[panic_handler]
+    pub fn panic(info: &core::panic::PanicInfo) -> ! {
+      test_panic_handler(info)
     }
 
     #[no_mangle]
