@@ -2,6 +2,7 @@ use core::fmt::{Arguments, Result, Write};
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
+use x86_64::instructions::interrupts;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -137,5 +138,7 @@ macro_rules! println {
 
 #[doc(hidden)]
 pub fn _print(args: Arguments) {
-  WRITER.lock().write_fmt(args).unwrap();
+  interrupts::without_interrupts(|| {
+    WRITER.lock().write_fmt(args).unwrap();
+  });
 }

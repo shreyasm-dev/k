@@ -15,13 +15,16 @@ pub mod vga;
 
 use core::panic::PanicInfo;
 use gdt::init_gdt;
-use interrupt::init_idt;
+use interrupt::{init_idt, PICS};
 use qemu::{exit_qemu, QemuExitCode};
 use util::{failed, ok, running};
+use x86_64::instructions;
 
 pub fn init() {
   init_gdt();
   init_idt();
+  unsafe { PICS.lock().initialize() };
+  instructions::interrupts::enable();
 }
 
 pub fn test_runner(tests: &[&dyn Fn() -> (&'static str, fn() -> bool)]) {
