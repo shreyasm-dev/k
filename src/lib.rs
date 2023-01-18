@@ -5,13 +5,19 @@
 #![reexport_test_harness_main = "test_main"]
 #![feature(abi_x86_interrupt)]
 
+pub mod interrupt;
 pub mod qemu;
 pub mod serial;
 pub mod test;
 pub mod vga;
 
-use crate::qemu::{exit_qemu, QemuExitCode};
 use core::panic::PanicInfo;
+use interrupt::init_idt;
+use qemu::{exit_qemu, QemuExitCode};
+
+pub fn init() {
+  init_idt();
+}
 
 pub fn test_runner(tests: &[&dyn Fn() -> (&'static str, bool)]) {
   let results = tests.iter().map(|test| test());
