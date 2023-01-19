@@ -2,18 +2,21 @@ use crate::{
   print, println,
   vga::{backspace, clear_screen, BUFFER_WIDTH},
 };
-use core::str::from_utf8_unchecked;
+use core::{arch::x86_64::_rdtsc, str::from_utf8_unchecked};
 use lazy_static::lazy_static;
 use rand_core::{RngCore, SeedableRng};
 use rand_xorshift::XorShiftRng;
+use raw_cpuid::CpuId;
 use spin::lock_api::Mutex;
 use x86_64::instructions::interrupts;
 
-const INPUT_WIDTH: usize = BUFFER_WIDTH - 1;
+const INPUT_WIDTH: usize = BUFFER_WIDTH - 2;
 static mut PROMPT: char = '>';
 
 pub fn prompt() {
-  unsafe { print!("{} ", PROMPT); }
+  unsafe {
+    print!("{} ", PROMPT);
+  }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -85,7 +88,8 @@ Available commands:
   rand <seed: u64> - Generate a cryptographically insecure random number using <seed> (if seed is not a valid u64, 0 is used)
   panic - Panic the kernel
   echo <text> - Print <text> to the screen
-  setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)");
+  setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)
+  cpuid - Get CPU information");
       }
       "about" => println!("\nSimple operating system written in Rust, developed by shreyasm-dev"),
       "clear" => {
@@ -101,6 +105,41 @@ Available commands:
       }
       "rand" => println!("\nMissing seed"),
       "setprompt" => println!("\nMissing prompt character"),
+      "cpuid" => {
+        let cpuid = CpuId::new();
+        let mut vendor_string = "Unknown";
+
+        let tsc = unsafe { _rdtsc() };
+
+        if let Some(vendor) = cpuid.get_vendor_info() {
+          let str = vendor.as_str();
+          if str == "GenuineIntel" {
+            vendor_string = "Intel (GenuineIntel)";
+          } else if str == "AuthenticAMD" {
+            vendor_string = "AMD (AuthenticAMD)";
+          }
+        }
+
+        if let Some(processor) = cpuid.get_processor_brand_string() {
+          println!(
+            "
+Vendor: {}
+Processor: {}
+Uptime (cycles): {}",
+            vendor_string,
+            processor.as_str(),
+            tsc
+          );
+        } else {
+          println!(
+            "
+Vendor: {}
+Processor: Unknown
+Uptime (cycles): {}",
+            vendor_string, tsc
+          );
+        }
+      }
       "echo" => println!("\n"),
       _ => {
         if str.starts_with("echo ") {

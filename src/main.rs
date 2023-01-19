@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use k::{halt, init, shell::prompt, println};
+use k::{halt, init, println, shell::prompt};
 
 #[cfg(test)]
 use k::test_panic_handler;

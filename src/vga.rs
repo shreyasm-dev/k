@@ -78,7 +78,9 @@ impl Writer {
       }
     }
 
-    unsafe { move_cursor(BUFFER_HEIGHT - 1, self.column_position); }
+    unsafe {
+      move_cursor(BUFFER_HEIGHT - 1, self.column_position);
+    }
   }
 
   fn new_line(&mut self) {

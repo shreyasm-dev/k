@@ -36,6 +36,7 @@ dependencies = [
  "pic8259",
  "rand_core",
  "rand_xorshift",
+ "raw-cpuid",
  "spin 0.9.4",
  "uart_16550",
  "volatile 0.2.7",
@@ -89,6 +90,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d25bf25ec5ae4a3f1b92f929810509a2f53d7dca2f50b794ff57e3face536c8f"
 dependencies = [
  "rand_core",
+]
+
+[[package]]
+name = "raw-cpuid"
+version = "10.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6823ea29436221176fe662da99998ad3b4db2c7f31e7b6f5fe43adccd6320bb"
+dependencies = [
+ "bitflags",
 ]
 
 [[package]]
