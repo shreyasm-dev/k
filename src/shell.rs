@@ -79,12 +79,12 @@ pub fn on_keydown(key: char) {
       "help" => {
         println!("
 Available commands:
-    help - Show this message
-    about - Show information about the OS
-    clear - Clear the screen
-    rand <seed: u64> - Generate a cryptographically insecure random number using <seed> (if seed is not a valid u64, 0 is used)
-    panic - Panic the kernel
-    echo <text> - Print <text> to the screen");
+  help - Show this message
+  about - Show information about the OS
+  clear - Clear the screen
+  rand <seed: u64> - Generate a cryptographically insecure random number using <seed> (if seed is not a valid u64, 0 is used)
+  panic - Panic the kernel
+  echo <text> - Print <text> to the screen");
       }
       "about" => println!("\nSimple operating system written in Rust, developed by shreyasm-dev"),
       "clear" => {
