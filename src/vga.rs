@@ -2,7 +2,7 @@ use core::fmt::{Arguments, Result, Write};
 use lazy_static::lazy_static;
 use spin::Mutex;
 use volatile::Volatile;
-use x86_64::instructions::interrupts;
+use x86_64::instructions::{interrupts, port::Port};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -77,6 +77,8 @@ impl Writer {
         self.column_position += 1;
       }
     }
+
+    unsafe { move_cursor(BUFFER_HEIGHT - 1, self.column_position); }
   }
 
   fn new_line(&mut self) {
@@ -156,6 +158,17 @@ pub fn clear_screen() {
 
     writer.column_position = BUFFER_WIDTH - 1;
   });
+}
+
+pub unsafe fn move_cursor(row: usize, col: usize) {
+  let position = (row * BUFFER_WIDTH + col) as u16;
+  let mut port_low = Port::new(0x3d4);
+  let mut port_high = Port::new(0x3d5);
+
+  port_low.write(0x0f as u8);
+  port_high.write((position & 0xff) as u8);
+  port_low.write(0x0e as u8);
+  port_high.write(((position >> 8) & 0xff) as u8);
 }
 
 #[doc(hidden)]
