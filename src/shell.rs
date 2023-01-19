@@ -78,7 +78,10 @@ pub fn on_keydown(key: char) {
     let str = unsafe { from_utf8_unchecked(&bytes) }.trim();
 
     shell.clear();
-    match str {
+
+    let (command, args) = str.split_at(str.find(' ').unwrap_or(str.len()));
+
+    match command {
       "help" => {
         println!("
 Available commands:
@@ -103,8 +106,28 @@ Available commands:
         println!();
         panic!("Panic from shell")
       }
-      "rand" => println!("\nMissing seed"),
-      "setprompt" => println!("\nMissing prompt character"),
+      "echo" => {
+        println!("\n{}", args);
+      }
+      "rand" => {
+        if args.is_empty() {
+          println!("\nMissing seed");
+        } else {
+          let seed = args.parse::<u64>().unwrap_or(0);
+          println!("\n{}", XorShiftRng::seed_from_u64(seed).next_u64());
+        }
+      }
+      "setprompt" => {
+        if args.is_empty() {
+          println!("\nMissing prompt character");
+        } else {
+          unsafe {
+            PROMPT = args.chars().nth(0).unwrap_or('>');
+          }
+
+          println!();
+        }
+      }
       "cpuid" => {
         let cpuid = CpuId::new();
 
@@ -126,23 +149,7 @@ Uptime (cycles): {}",
           tsc
         );
       }
-      "echo" => println!("\n"),
-      _ => {
-        if str.starts_with("echo ") {
-          println!("\n{}", &str[5..]);
-        } else if str.starts_with("rand ") {
-          let seed = str[5..].parse::<u64>().unwrap_or(0);
-          println!("\n{}", XorShiftRng::seed_from_u64(seed).next_u64());
-        } else if str.starts_with("setprompt ") {
-          unsafe {
-            PROMPT = str.chars().nth(10).unwrap_or('>');
-          }
-
-          println!();
-        } else {
-          println!("\nUnknown command, type 'help' for a list of available commands");
-        }
-      }
+      _ => println!("\nUnknown command, type 'help' for a list of available commands"),
     }
 
     prompt();
