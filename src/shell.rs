@@ -108,7 +108,9 @@ pub fn evaluate_command(str: &str) {
   setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)
   cpuid - Get CPU information
   uptime - Get the uptime of the system (in cycles, not seconds)
-  memcat <addr: usize> <len: usize> - Print the contents of memory at <addr> with length <len> (hexadecimal is not supported yet)");
+  memcat <addr: usize> <len: usize> - Print the contents of memory at <addr> with length <len> (hexadecimal is not supported yet)
+  memecho <addr: usize> <pos: usize> <val: u8> - Set the value at <addr> + <pos> to <val> (hexadecimal is not supported yet)
+  memcp <src: usize> <dst: usize> <len: usize> - Copy <len> bytes from <src> to <dst> (hexadecimal is not supported yet)");
     }
     "about" => println!("Simple operating system written in Rust, developed by shreyasm-dev"),
     "clear" => {
@@ -188,6 +190,104 @@ Uptime (cycles): {}",
 
       let mem_output = unsafe { core::slice::from_raw_parts(addr as *const u8, len) };
       println!("{:X?}", mem_output);
+    }
+    "memecho" => {
+      let mut args_iter = args.split_whitespace();
+
+      let addr = match args_iter.next() {
+        Some(arg) => match arg.parse::<usize>() {
+          Ok(addr) => addr,
+          _ => {
+            println!("Invalid address");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing address");
+          return;
+        }
+      };
+
+      let pos = match args_iter.next() {
+        Some(arg) => match arg.parse::<usize>() {
+          Ok(pos) => pos,
+          _ => {
+            println!("Invalid position");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing position");
+          return;
+        }
+      };
+
+      let val = match args_iter.next() {
+        Some(arg) => match arg.parse::<u8>() {
+          Ok(val) => val,
+          _ => {
+            println!("Invalid value");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing value");
+          return;
+        }
+      };
+
+      unsafe {
+        *((addr + pos) as *mut u8) = val;
+      }
+    }
+    "memcp" => {
+      let mut args_iter = args.split_whitespace();
+
+      let src = match args_iter.next() {
+        Some(arg) => match arg.parse::<usize>() {
+          Ok(src) => src,
+          _ => {
+            println!("Invalid source address");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing source address");
+          return;
+        }
+      };
+
+      let dst = match args_iter.next() {
+        Some(arg) => match arg.parse::<usize>() {
+          Ok(dst) => dst,
+          _ => {
+            println!("Invalid destination address");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing destination address");
+          return;
+        }
+      };
+
+      let len = match args_iter.next() {
+        Some(arg) => match arg.parse::<usize>() {
+          Ok(len) => len,
+          _ => {
+            println!("Invalid length");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing length");
+          return;
+        }
+      };
+
+      unsafe {
+        core::ptr::copy(src as *const u8, dst as *mut u8, len);
+      }
     }
     _ => println!("Unknown command, type 'help' for a list of available commands"),
   }
