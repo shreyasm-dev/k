@@ -102,29 +102,31 @@ pub fn evaluate_command(str: &str) {
       println!("Available commands:
   help - Show this message
   about - Show information about the OS
-  clear - Clear the screen
-  panic - Panic the kernel
+  
   echo <text> - Print <text> to the screen
+  clear - Clear the screen
+
   setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)
+
   cpuid - Get CPU information
   uptime - Get the uptime of the system (in cycles, not seconds)
+
   memcat <addr: usize> <len: usize> - Print the contents of memory at <addr> with length <len> (hexadecimal is not supported yet)
   memecho <addr: usize> <pos: usize> <val: u8> - Set the value at <addr> + <pos> to <val> (hexadecimal is not supported yet)
-  memcp <src: usize> <dst: usize> <len: usize> - Copy <len> bytes from <src> to <dst> (hexadecimal is not supported yet)");
+  memcp <src: usize> <dst: usize> <len: usize> - Copy <len> bytes from <src> to <dst> (hexadecimal is not supported yet)
+  
+  panic - Panic the kernel");
     }
     "about" => println!("Simple operating system written in Rust, developed by shreyasm-dev"),
+    "echo" => {
+      println!("{}", args);
+    }
     "clear" => {
       interrupts::without_interrupts(|| {
         clear_screen();
       });
 
       println!();
-    }
-    "panic" => {
-      panic!("Panic from shell")
-    }
-    "echo" => {
-      println!("{}", args);
     }
     "setprompt" => {
       if args.is_empty() {
@@ -288,6 +290,9 @@ Uptime (cycles): {}",
       unsafe {
         core::ptr::copy(src as *const u8, dst as *mut u8, len);
       }
+    }
+    "panic" => {
+      panic!("Panic from shell")
     }
     _ => println!("Unknown command, type 'help' for a list of available commands"),
   }
