@@ -9,11 +9,11 @@ use rand_xorshift::XorShiftRng;
 use spin::lock_api::Mutex;
 use x86_64::instructions::interrupts;
 
-const PROMPT: &'static str = "> ";
-const INPUT_WIDTH: usize = BUFFER_WIDTH - PROMPT.len();
+const INPUT_WIDTH: usize = BUFFER_WIDTH - 1;
+static mut PROMPT: char = '>';
 
 pub fn prompt() {
-  print!("{}", PROMPT);
+  unsafe { print!("{} ", PROMPT); }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,7 +84,8 @@ Available commands:
   clear - Clear the screen
   rand <seed: u64> - Generate a cryptographically insecure random number using <seed> (if seed is not a valid u64, 0 is used)
   panic - Panic the kernel
-  echo <text> - Print <text> to the screen");
+  echo <text> - Print <text> to the screen
+  setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)");
       }
       "about" => println!("\nSimple operating system written in Rust, developed by shreyasm-dev"),
       "clear" => {
@@ -99,6 +100,7 @@ Available commands:
         panic!("Panic from shell")
       }
       "rand" => println!("\nMissing seed"),
+      "setprompt" => println!("\nMissing prompt character"),
       "echo" => println!("\n"),
       _ => {
         if str.starts_with("echo ") {
@@ -106,6 +108,12 @@ Available commands:
         } else if str.starts_with("rand ") {
           let seed = str[5..].parse::<u64>().unwrap_or(0);
           println!("\n{}", XorShiftRng::seed_from_u64(seed).next_u64());
+        } else if str.starts_with("setprompt ") {
+          unsafe {
+            PROMPT = str.chars().nth(10).unwrap_or('>');
+          }
+
+          println!();
         } else {
           println!("\nUnknown command, type 'help' for a list of available commands");
         }

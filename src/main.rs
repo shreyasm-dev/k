@@ -5,13 +5,14 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
-use k::{halt, init, shell::prompt};
+use k::{halt, init, shell::prompt, println};
 
 #[cfg(test)]
 use k::test_panic_handler;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+  println!("Type 'help' to get started");
   prompt();
 
   init();
