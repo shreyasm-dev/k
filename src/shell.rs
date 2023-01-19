@@ -76,19 +76,30 @@ pub fn on_keydown(key: char) {
     let str = unsafe { from_utf8_unchecked(&bytes) }.trim();
 
     shell.clear();
+    evaluate_command(str);
+    prompt();
+  } else if shell.add_char(key) {
+    print!("{}", key);
+  }
 
-    let (command, args) = str.split_at(str.find(' ').unwrap_or(str.len()));
-    let args = if args.starts_with(' ') {
-      &args[1..]
-    } else {
-      args
-    };
+  unsafe {
+    SHELL.force_unlock();
+  }
+}
 
-    println!();
+pub fn evaluate_command(str: &str) {
+  let (command, args) = str.split_at(str.find(' ').unwrap_or(str.len()));
+  let args = if args.starts_with(' ') {
+    &args[1..]
+  } else {
+    args
+  };
 
-    match command {
-      "help" => {
-        println!("Available commands:
+  println!();
+
+  match command {
+    "help" => {
+      println!("Available commands:
   help - Show this message
   about - Show information about the OS
   clear - Clear the screen
@@ -98,95 +109,86 @@ pub fn on_keydown(key: char) {
   cpuid - Get CPU information
   uptime - Get the uptime of the system (in cycles, not seconds)
   memcat <addr: usize> <len: usize> - Print the contents of memory at <addr> with length <len> (hexadecimal is not supported yet)");
-      }
-      "about" => println!("Simple operating system written in Rust, developed by shreyasm-dev"),
-      "clear" => {
-        interrupts::without_interrupts(|| {
-          clear_screen();
-        });
+    }
+    "about" => println!("Simple operating system written in Rust, developed by shreyasm-dev"),
+    "clear" => {
+      interrupts::without_interrupts(|| {
+        clear_screen();
+      });
 
-        println!();
-      }
-      "panic" => {
-        panic!("Panic from shell")
-      }
-      "echo" => {
-        println!("{}", args);
-      }
-      "setprompt" => {
-        if args.is_empty() {
-          println!("Missing prompt character");
-        } else {
-          unsafe {
-            PROMPT = args.chars().nth(0).unwrap_or('>');
-          }
+      println!();
+    }
+    "panic" => {
+      panic!("Panic from shell")
+    }
+    "echo" => {
+      println!("{}", args);
+    }
+    "setprompt" => {
+      if args.is_empty() {
+        println!("Missing prompt character");
+      } else {
+        unsafe {
+          PROMPT = args.chars().nth(0).unwrap_or('>');
         }
       }
-      "cpuid" => {
-        let cpuid = CpuId::new();
+    }
+    "cpuid" => {
+      let cpuid = CpuId::new();
 
-        let vendor = cpuid.get_vendor_info();
-        let vendor = vendor.as_ref().map(|s| s.as_str()).unwrap_or("Unknown");
+      let vendor = cpuid.get_vendor_info();
+      let vendor = vendor.as_ref().map(|s| s.as_str()).unwrap_or("Unknown");
 
-        let processor = cpuid.get_processor_brand_string();
-        let processor = processor.as_ref().map(|s| s.as_str()).unwrap_or("Unknown");
+      let processor = cpuid.get_processor_brand_string();
+      let processor = processor.as_ref().map(|s| s.as_str()).unwrap_or("Unknown");
 
-        let tsc = unsafe { _rdtsc() };
+      let tsc = unsafe { _rdtsc() };
 
-        println!(
-          "Vendor: {}
+      println!(
+        "Vendor: {}
 Processor: {}
 Uptime (cycles): {}",
-          vendor, processor, tsc
-        );
-      }
-      "uptime" => {
-        let tsc = unsafe { _rdtsc() };
-        println!("{}", tsc);
-      }
-      "memcat" => {
-        let mut args_iter = args.split_whitespace();
-
-        let addr = match args_iter.next() {
-          Some(arg) => match arg.parse::<usize>() {
-            Ok(addr) => addr,
-            _ => {
-              println!("Invalid address");
-              return;
-            }
-          },
-          _ => {
-            println!("Missing address");
-            return;
-          }
-        };
-
-        let len = match args_iter.next() {
-          Some(arg) => match arg.parse::<usize>() {
-            Ok(len) => len,
-            _ => {
-              println!("Invalid length");
-              return;
-            }
-          },
-          _ => {
-            println!("Missing length");
-            return;
-          }
-        };
-
-        let mem_output = unsafe { core::slice::from_raw_parts(addr as *const u8, len) };
-        println!("{:X?}", mem_output);
-      }
-      _ => println!("Unknown command, type 'help' for a list of available commands"),
+        vendor, processor, tsc
+      );
     }
+    "uptime" => {
+      let tsc = unsafe { _rdtsc() };
+      println!("{}", tsc);
+    }
+    "memcat" => {
+      let mut args_iter = args.split_whitespace();
 
-    prompt();
-  } else if shell.add_char(key) {
-    print!("{}", key);
-  }
+      let addr = match args_iter.next() {
+        Some(arg) => match arg.parse::<usize>() {
+          Ok(addr) => addr,
+          _ => {
+            println!("Invalid address");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing address");
+          return;
+        }
+      };
 
-  unsafe {
-    SHELL.force_unlock();
+      let len = match args_iter.next() {
+        Some(arg) => match arg.parse::<usize>() {
+          Ok(len) => len,
+          _ => {
+            println!("Invalid length");
+            return;
+          }
+        },
+        _ => {
+          println!("Missing length");
+          return;
+        }
+      };
+
+      let mem_output = unsafe { core::slice::from_raw_parts(addr as *const u8, len) };
+      println!("{:X?}", mem_output);
+    }
+    _ => println!("Unknown command, type 'help' for a list of available commands"),
   }
 }
