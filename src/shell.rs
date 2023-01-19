@@ -4,8 +4,6 @@ use crate::{
 };
 use core::{arch::x86_64::_rdtsc, str::from_utf8_unchecked};
 use lazy_static::lazy_static;
-use rand_core::{RngCore, SeedableRng};
-use rand_xorshift::XorShiftRng;
 use raw_cpuid::CpuId;
 use spin::lock_api::Mutex;
 use x86_64::instructions::interrupts;
@@ -80,7 +78,11 @@ pub fn on_keydown(key: char) {
     shell.clear();
 
     let (command, args) = str.split_at(str.find(' ').unwrap_or(str.len()));
-    let args = if args[0..1] == *" " { &args[1..] } else { args };
+    let args = if args.starts_with(' ') {
+      &args[1..]
+    } else {
+      args
+    };
 
     match command {
       "help" => {
@@ -89,7 +91,6 @@ Available commands:
   help - Show this message
   about - Show information about the OS
   clear - Clear the screen
-  rand <seed: u64> - Generate a cryptographically insecure random number using <seed> (if seed is not a valid u64, 0 is used)
   panic - Panic the kernel
   echo <text> - Print <text> to the screen
   setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)
@@ -109,14 +110,6 @@ Available commands:
       }
       "echo" => {
         println!("\n{}", args);
-      }
-      "rand" => {
-        if args.is_empty() {
-          println!("\nMissing seed");
-        } else {
-          let seed = args.parse::<u64>().unwrap_or(0);
-          println!("\n{}", XorShiftRng::seed_from_u64(seed).next_u64());
-        }
       }
       "setprompt" => {
         if args.is_empty() {
@@ -145,9 +138,7 @@ Available commands:
 Vendor: {}
 Processor: {}
 Uptime (cycles): {}",
-          vendor,
-          processor,
-          tsc
+          vendor, processor, tsc
         );
       }
       _ => println!("\nUnknown command, type 'help' for a list of available commands"),
