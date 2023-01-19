@@ -79,7 +79,7 @@ impl Writer {
     }
 
     unsafe {
-      move_cursor(BUFFER_HEIGHT - 1, self.column_position);
+      move_cursor(BUFFER_HEIGHT - 1, self.column_position); // TODO: Wonky with backspaces
     }
   }
 
