@@ -26,8 +26,6 @@ pub extern "C" fn _start() -> ! {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-  use k::println;
-
   println!("{}", info);
   halt();
 }
