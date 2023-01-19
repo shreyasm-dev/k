@@ -84,10 +84,11 @@ pub fn on_keydown(key: char) {
       args
     };
 
+    println!();
+
     match command {
       "help" => {
-        println!("
-Available commands:
+        println!("Available commands:
   help - Show this message
   about - Show information about the OS
   clear - Clear the screen
@@ -98,7 +99,7 @@ Available commands:
   uptime - Get the uptime of the system (in cycles, not seconds)
   memcat <addr: usize> <len: usize> - Print the contents of memory at <addr> with length <len> (hexadecimal is not supported yet)");
       }
-      "about" => println!("\nSimple operating system written in Rust, developed by shreyasm-dev"),
+      "about" => println!("Simple operating system written in Rust, developed by shreyasm-dev"),
       "clear" => {
         interrupts::without_interrupts(|| {
           clear_screen();
@@ -107,21 +108,18 @@ Available commands:
         println!();
       }
       "panic" => {
-        println!();
         panic!("Panic from shell")
       }
       "echo" => {
-        println!("\n{}", args);
+        println!("{}", args);
       }
       "setprompt" => {
         if args.is_empty() {
-          println!("\nMissing prompt character");
+          println!("Missing prompt character");
         } else {
           unsafe {
             PROMPT = args.chars().nth(0).unwrap_or('>');
           }
-
-          println!();
         }
       }
       "cpuid" => {
@@ -136,8 +134,7 @@ Available commands:
         let tsc = unsafe { _rdtsc() };
 
         println!(
-          "
-Vendor: {}
+          "Vendor: {}
 Processor: {}
 Uptime (cycles): {}",
           vendor, processor, tsc
@@ -145,7 +142,7 @@ Uptime (cycles): {}",
       }
       "uptime" => {
         let tsc = unsafe { _rdtsc() };
-        println!("\n{}", tsc);
+        println!("{}", tsc);
       }
       "memcat" => {
         let mut args_iter = args.split_whitespace();
@@ -154,12 +151,12 @@ Uptime (cycles): {}",
           Some(arg) => match arg.parse::<usize>() {
             Ok(addr) => addr,
             _ => {
-              println!("\nInvalid address");
+              println!("Invalid address");
               return;
             }
           },
           _ => {
-            println!("\nMissing address");
+            println!("Missing address");
             return;
           }
         };
@@ -168,20 +165,20 @@ Uptime (cycles): {}",
           Some(arg) => match arg.parse::<usize>() {
             Ok(len) => len,
             _ => {
-              println!("\nInvalid length");
+              println!("Invalid length");
               return;
             }
           },
           _ => {
-            println!("\nMissing length");
+            println!("Missing length");
             return;
           }
         };
 
         let mem_output = unsafe { core::slice::from_raw_parts(addr as *const u8, len) };
-        println!("\n{:X?}", mem_output);
+        println!("{:X?}", mem_output);
       }
-      _ => println!("\nUnknown command, type 'help' for a list of available commands"),
+      _ => println!("Unknown command, type 'help' for a list of available commands"),
     }
 
     prompt();
