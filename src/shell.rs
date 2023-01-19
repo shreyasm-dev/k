@@ -10,6 +10,7 @@ use x86_64::instructions::interrupts;
 
 const INPUT_WIDTH: usize = BUFFER_WIDTH - 2;
 static mut PROMPT: char = '>';
+static mut HISTORY: [char; INPUT_WIDTH] = [' '; INPUT_WIDTH];
 
 pub fn prompt() {
   unsafe {
@@ -55,6 +56,12 @@ impl Shell {
     self.len = 0;
     self.buffer = [' '; INPUT_WIDTH];
   }
+
+  pub fn set_buffer(&mut self, buffer: [char; INPUT_WIDTH]) {
+    let len = buffer.iter().position(|&c| c == ' ').unwrap_or(INPUT_WIDTH);
+    self.len = len;
+    self.buffer = buffer;
+  }
 }
 
 lazy_static! {
@@ -67,6 +74,18 @@ pub fn on_keydown(key: char) {
     if shell.backspace() {
       backspace();
     }
+  } else if key == '↑' {
+    if shell.buffer.iter().all(|&c| c == ' ') && !unsafe { HISTORY.iter().all(|&c| c == ' ') } {
+      shell.set_buffer(unsafe { HISTORY });
+      let mut bytes = [0u8; INPUT_WIDTH];
+      for (i, c) in shell.buffer.iter().enumerate() {
+        bytes[i] = *c as u8;
+      }
+
+      let bytes: &'static [u8; INPUT_WIDTH] = unsafe { transmute(&bytes) };
+      let str: &'static str = unsafe { from_utf8_unchecked(bytes) }.trim_end();
+      print!("{}", str);
+    }
   } else if key == '\n' {
     let mut bytes = [0u8; INPUT_WIDTH];
     for (i, c) in shell.buffer.iter().enumerate() {
@@ -78,6 +97,16 @@ pub fn on_keydown(key: char) {
 
     shell.clear();
     evaluate_command(str);
+
+    let mut buffer = [' '; INPUT_WIDTH];
+    for (i, c) in str.chars().enumerate() {
+      buffer[i] = c;
+    }
+
+    unsafe {
+      HISTORY = buffer;
+    }
+
     prompt();
   } else if shell.add_char(key) {
     print!("{}", key);
@@ -108,6 +137,7 @@ pub fn evaluate_command(str: &str) {
   clear - Clear the screen
 
   setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)
+  last - Print the last command
 
   cpuid - Get CPU information
   uptime - Get the uptime of the system (in cycles, not seconds)
@@ -136,6 +166,18 @@ pub fn evaluate_command(str: &str) {
         unsafe {
           PROMPT = args.chars().nth(0).unwrap_or('>');
         }
+      }
+    }
+    "last" => {
+      unsafe {
+        let mut bytes = [0u8; INPUT_WIDTH];
+        for (i, c) in HISTORY.iter().enumerate() {
+          bytes[i] = *c as u8;
+        }
+
+        let bytes: &'static [u8; INPUT_WIDTH] = transmute(&bytes);
+        let str: &'static str = from_utf8_unchecked(bytes);
+        println!("{}", str);
       }
     }
     "cpuid" => {
