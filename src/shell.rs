@@ -168,18 +168,16 @@ pub fn evaluate_command(str: &str) {
         }
       }
     }
-    "last" => {
-      unsafe {
-        let mut bytes = [0u8; INPUT_WIDTH];
-        for (i, c) in HISTORY.iter().enumerate() {
-          bytes[i] = *c as u8;
-        }
-
-        let bytes: &'static [u8; INPUT_WIDTH] = transmute(&bytes);
-        let str: &'static str = from_utf8_unchecked(bytes);
-        println!("{}", str);
+    "last" => unsafe {
+      let mut bytes = [0u8; INPUT_WIDTH];
+      for (i, c) in HISTORY.iter().enumerate() {
+        bytes[i] = *c as u8;
       }
-    }
+
+      let bytes: &'static [u8; INPUT_WIDTH] = transmute(&bytes);
+      let str: &'static str = from_utf8_unchecked(bytes);
+      println!("{}", str);
+    },
     "cpuid" => {
       let cpuid = CpuId::new();
 

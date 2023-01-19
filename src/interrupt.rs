@@ -89,12 +89,10 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     if let Some(key) = keyboard.process_keyevent(key_event) {
       match key {
         DecodedKey::Unicode(character) => on_keydown(character),
-        DecodedKey::RawKey(key) => {
-          match key {
-            pc_keyboard::KeyCode::ArrowUp => on_keydown('↑'),
-            _ => (),
-          }
-        }
+        DecodedKey::RawKey(key) => match key {
+          pc_keyboard::KeyCode::ArrowUp => on_keydown('↑'),
+          _ => (),
+        },
       }
     }
   }
