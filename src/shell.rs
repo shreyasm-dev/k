@@ -107,28 +107,21 @@ Available commands:
       "setprompt" => println!("\nMissing prompt character"),
       "cpuid" => {
         let cpuid = CpuId::new();
-        let mut vendor_string = "Unknown";
 
-        let tsc = unsafe { _rdtsc() };
-
-        if let Some(vendor) = cpuid.get_vendor_info() {
-          let str = vendor.as_str();
-          if str == "GenuineIntel" {
-            vendor_string = "Intel (GenuineIntel)";
-          } else if str == "AuthenticAMD" {
-            vendor_string = "AMD (AuthenticAMD)";
-          }
-        }
+        let vendor = cpuid.get_vendor_info();
+        let vendor = vendor.as_ref().map(|s| s.as_str()).unwrap_or("Unknown");
 
         let processor = cpuid.get_processor_brand_string();
         let processor = processor.as_ref().map(|s| s.as_str()).unwrap_or("Unknown");
+
+        let tsc = unsafe { _rdtsc() };
 
         println!(
           "
 Vendor: {}
 Processor: {}
 Uptime (cycles): {}",
-          vendor_string,
+          vendor,
           processor,
           tsc
         );
