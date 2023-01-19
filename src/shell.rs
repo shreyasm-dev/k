@@ -80,6 +80,7 @@ pub fn on_keydown(key: char) {
     shell.clear();
 
     let (command, args) = str.split_at(str.find(' ').unwrap_or(str.len()));
+    let args = if args[0..1] == *" " { &args[1..] } else { args };
 
     match command {
       "help" => {
