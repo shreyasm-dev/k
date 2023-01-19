@@ -120,25 +120,18 @@ Available commands:
           }
         }
 
-        if let Some(processor) = cpuid.get_processor_brand_string() {
-          println!(
-            "
+        let processor = cpuid.get_processor_brand_string();
+        let processor = processor.as_ref().map(|s| s.as_str()).unwrap_or("Unknown");
+
+        println!(
+          "
 Vendor: {}
 Processor: {}
 Uptime (cycles): {}",
-            vendor_string,
-            processor.as_str(),
-            tsc
-          );
-        } else {
-          println!(
-            "
-Vendor: {}
-Processor: Unknown
-Uptime (cycles): {}",
-            vendor_string, tsc
-          );
-        }
+          vendor_string,
+          processor,
+          tsc
+        );
       }
       "echo" => println!("\n"),
       _ => {
