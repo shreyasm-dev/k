@@ -2,7 +2,7 @@ use crate::{
   print, println,
   vga::{backspace, clear_screen, BUFFER_WIDTH},
 };
-use core::{arch::x86_64::_rdtsc, str::from_utf8_unchecked};
+use core::{arch::x86_64::_rdtsc, mem::transmute, str::from_utf8_unchecked};
 use lazy_static::lazy_static;
 use raw_cpuid::CpuId;
 use spin::lock_api::Mutex;
@@ -73,7 +73,8 @@ pub fn on_keydown(key: char) {
       bytes[i] = *c as u8;
     }
 
-    let str = unsafe { from_utf8_unchecked(&bytes) }.trim();
+    let bytes: &'static [u8; INPUT_WIDTH] = unsafe { transmute(&bytes) };
+    let str: &'static str = unsafe { from_utf8_unchecked(bytes) };
 
     shell.clear();
     evaluate_command(str);
