@@ -94,7 +94,9 @@ Available commands:
   panic - Panic the kernel
   echo <text> - Print <text> to the screen
   setprompt <c: char> - Set the prompt to <c> (if c is longer than 1 character, the first character is used)
-  cpuid - Get CPU information");
+  cpuid - Get CPU information
+  uptime - Get the uptime of the system (in cycles, not seconds)
+  memcat <addr: usize> <len: usize> - Print the contents of memory at <addr> with length <len> (hexadecimal is not supported yet)");
       }
       "about" => println!("\nSimple operating system written in Rust, developed by shreyasm-dev"),
       "clear" => {
@@ -140,6 +142,44 @@ Processor: {}
 Uptime (cycles): {}",
           vendor, processor, tsc
         );
+      }
+      "uptime" => {
+        let tsc = unsafe { _rdtsc() };
+        println!("\n{}", tsc);
+      }
+      "memcat" => {
+        let mut args_iter = args.split_whitespace();
+
+        let addr = match args_iter.next() {
+          Some(arg) => match arg.parse::<usize>() {
+            Ok(addr) => addr,
+            _ => {
+              println!("\nInvalid address");
+              return;
+            }
+          },
+          _ => {
+            println!("\nMissing address");
+            return;
+          }
+        };
+
+        let len = match args_iter.next() {
+          Some(arg) => match arg.parse::<usize>() {
+            Ok(len) => len,
+            _ => {
+              println!("\nInvalid length");
+              return;
+            }
+          },
+          _ => {
+            println!("\nMissing length");
+            return;
+          }
+        };
+
+        let mem_output = unsafe { core::slice::from_raw_parts(addr as *const u8, len) };
+        println!("\n{:X?}", mem_output);
       }
       _ => println!("\nUnknown command, type 'help' for a list of available commands"),
     }
