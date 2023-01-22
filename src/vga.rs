@@ -79,7 +79,7 @@ impl Writer {
     }
 
     unsafe {
-      move_cursor(BUFFER_HEIGHT - 1, self.column_position); // TODO: Wonky with backspaces
+      move_cursor(BUFFER_HEIGHT - 1, self.column_position);
     }
   }
 
@@ -147,6 +147,10 @@ pub fn backspace() {
       writer.column_position -= 1;
       writer.write_byte(b' ');
       writer.column_position -= 1;
+    }
+
+    unsafe {
+      move_cursor(BUFFER_HEIGHT - 1, writer.column_position);
     }
   });
 }
